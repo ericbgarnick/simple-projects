@@ -52,3 +52,32 @@ class TestBoard(TestCase):
         middle = {12: {6, 7, 8, 11, 13, 16, 17, 18}}
 
         self.get_neighbors_check(middle)
+
+    def test_build_board_repr_no_revealed(self):
+        expected = [
+            ['#' for _ in range(self.board_size)]
+            for _ in range(self.board_size)
+        ]
+        actual = self.b.build_board_repr()
+
+        self.assertEqual(len(expected), len(actual))
+        for i, e_row in enumerate(expected):
+            a_row = actual[i]
+            self.assertListEqual(e_row, a_row)
+
+    def test_build_board_repr_one_revealed(self):
+        expected = [
+            ['#' for _ in range(self.board_size)]
+            for _ in range(self.board_size)
+        ]
+
+        self.b._revealed[0] = "_"
+        expected[0][0] = '_'
+
+        actual = self.b.build_board_repr()
+
+        self.assertEqual(len(expected), len(actual))
+        for i, e_row in enumerate(expected):
+            a_row = actual[i]
+            self.assertListEqual(e_row, a_row)
+

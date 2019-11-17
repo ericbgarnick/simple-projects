@@ -19,7 +19,7 @@ class Board:
     def __init__(self, size: int, difficulty: GameDifficulty):
         self._board_size = size
         self._bomb_locs = self._create_bombs(self.PCT_BOMBS[difficulty])
-        self._guesses = {}  # guessed index -> value to show
+        self._revealed = {}  # revealed index -> value to show
 
     def _create_bombs(self, pct_bombs: int) -> Set[int]:
         """
@@ -39,10 +39,20 @@ class Board:
     def build_board_repr(self) -> List[List[str]]:
         board_repr = []
         for i in range(self._board_size ** 2):
+            symbol = self._revealed.get(i, '#')
+            if not i % self._board_size:
+                board_repr.append([symbol])
+            else:
+                board_repr[-1].append(symbol)
+        return board_repr
+
+    def reveal_spaces(self):
+        board_repr = []
+        for i in range(self._board_size ** 2):
             if i in self._bomb_locs:
                 symbol = "*"
             else:
-                symbol = self._guesses.get(i) or self.calc_symbol(i)
+                symbol = self._revealed.get(i) or self.calc_symbol(i)
             if not i % self._board_size:
                 board_repr.append([symbol])
             else:
@@ -98,6 +108,6 @@ class Board:
 
 
 if __name__ == '__main__':
-    board_size, difficulty = sys.argv[1:3]
-    b = Board(int(board_size), GameDifficulty[difficulty.upper()])
+    board_size, diff = sys.argv[1:3]
+    b = Board(int(board_size), GameDifficulty[diff.upper()])
     print(b)
