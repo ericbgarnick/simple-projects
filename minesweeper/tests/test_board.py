@@ -14,6 +14,7 @@ class TestBoard(TestCase):
 
     def tearDown(self) -> None:
         self.b._bomb_locs = set()
+        self.b._revealed = {}
 
     def test_create_board(self):
         self.assertEqual(self.b.board_size, self.board_size)
@@ -105,3 +106,59 @@ class TestBoard(TestCase):
         self.b._bomb_locs |= {0, 1, 2, 5, 7, 10, 11, 12}
         symbol = self.b.calc_symbol(6)
         self.assertEqual(symbol, '8')
+
+    def test_reveal_for_chosen_bomb(self):
+        """
+        * _ _ _ _
+        _ _ _ _ _
+        _ _ _ _ _
+        _ _ _ _ _
+        _ _ _ _ _
+        """
+        pos = 0
+        self.b._bomb_locs.add(pos)
+        self.b.reveal_for_chosen(pos)
+        self.assertDictEqual(self.b._revealed, {pos: self.b.BOMB})
+
+    def test_reveal_for_chosen_num(self):
+        """
+        * 1 _ _ _
+        _ _ _ _ _
+        _ _ _ _ _
+        _ _ _ _ _
+        _ _ _ _ _
+        """
+        self.b._bomb_locs.add(0)
+        self.b.reveal_for_chosen(1)
+        self.assertDictEqual(self.b._revealed, {1: '1'})
+
+    def test_reveal_for_chosen_one_blank(self):
+        """
+        _ 2 * _ _
+        2 5 * _ _
+        * * * _ _
+        _ _ _ _ _
+        _ _ _ _ _
+        """
+        self.b._bomb_locs |= {2, 7, 10, 11, 12}
+        self.b.reveal_for_chosen(0)
+
+        expected = {0: self.b.BLANK, 1: '2', 5: '2', 6: '5'}
+
+        self.assertDictEqual(self.b._revealed, expected)
+
+    def test_reveal_for_chosen_two_blanks(self):
+        """
+        _ _ 2 * _
+        2 3 5 * _
+        * * _ * _
+        _ _ _ _ _
+        _ _ _ _ _
+        """
+        self.b._bomb_locs |= {3, 8, 10, 11, 12, 13}
+        self.b.reveal_for_chosen(0)
+
+        expected = {0: self.b.BLANK, 1: self.b.BLANK,
+                    2: '2', 5: '2', 6: '3', 7: '5'}
+
+        self.assertDictEqual(self.b._revealed, expected)

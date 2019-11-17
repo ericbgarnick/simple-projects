@@ -53,15 +53,9 @@ class Board:
 
     # TODO: test
     def reveal_for_chosen(self, chosen: int):
-        symbol = self.calc_symbol(chosen)
-        if symbol == self.BLANK:
-            self.expand_blanks(chosen)
-
-    # TODO: test
-    def expand_blanks(self, chosen: int):
         to_check = Queue()
         to_check.put(chosen)
-        while to_check:
+        while not to_check.empty():
             cur = to_check.get()
             cur_symbol = self.calc_symbol(cur)
             self._revealed[cur] = cur_symbol
@@ -70,7 +64,6 @@ class Board:
                     if n not in self._revealed:
                         to_check.put(n)
 
-    # TODO: test
     def calc_symbol(self, i: int) -> str:
         if i in self._bomb_locs:
             return self.BOMB
@@ -128,4 +121,3 @@ if __name__ == '__main__':
     board_size, diff = sys.argv[1:3]
     b = Board(int(board_size), GameDifficulty[diff.upper()])
     print(b)
-
