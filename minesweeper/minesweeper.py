@@ -23,18 +23,19 @@ class Minesweeper:
 
     def __init__(self, size: int, difficulty: GameDifficulty):
         self._board_size = size
+        self._num_spaces = self._board_size ** 2
         self._bomb_locs = self._create_bombs(self.PCT_BOMBS[difficulty])
         self._revealed = {}  # revealed index -> value to show
+        self._chose_bomb = False
 
     def _create_bombs(self, pct_bombs: int) -> Set[int]:
         """
         Return a set of indices fpr as many bombs
         as indicated by pct_bombs (% total spaces).
         """
-        num_spaces = self._board_size ** 2
-        num_bombs = int((pct_bombs / 100) * num_spaces)
+        num_bombs = int((pct_bombs / 100) * self._num_spaces)
         bomb_idxs = set()
-        free_spaces = list(range(num_spaces))
+        free_spaces = list(range(self._num_spaces))
         while len(bomb_idxs) < num_bombs:
             bomb_space = random.choice(free_spaces)
             bomb_idxs.add(bomb_space)
@@ -43,13 +44,33 @@ class Minesweeper:
 
     def build_board_repr(self) -> List[List[str]]:
         board_repr = []
-        for i in range(self._board_size ** 2):
+        for i in range(self._num_spaces):
             symbol = self._revealed.get(i, self.HIDDEN)
             if not i % self._board_size:
                 board_repr.append([symbol])
             else:
                 board_repr[-1].append(symbol)
         return board_repr
+
+    def run(self):
+        while not (self.lost() or self.won()):
+            print(self)
+            choice = int(input("Choose an index: "))
+            self.reveal_for_chosen(choice)
+        if self.lost():
+            print("YOU LOSE!")
+        else:
+            print("YOU WIN!")
+        for s in range(self._num_spaces):
+            self.reveal_for_chosen(s)
+        print(self)
+
+    def lost(self) -> bool:
+        return self._chose_bomb
+
+    def won(self) -> bool:
+        num_spaces = self._num_spaces
+        return len(self._revealed) == num_spaces - len(self._bomb_locs)
 
     def reveal_for_chosen(self, chosen: int):
         """Add chosen symbol to self._revealed, adding
@@ -68,6 +89,7 @@ class Minesweeper:
     def calc_symbol(self, i: int) -> str:
         """Return the symbol to show for the space at index i"""
         if i in self._bomb_locs:
+            self._chose_bomb = True
             return self.BOMB
         else:
             neighbors = self.get_neighbors(i)
@@ -123,4 +145,4 @@ class Minesweeper:
 if __name__ == '__main__':
     board_size, diff = sys.argv[1:3]
     m = Minesweeper(int(board_size), GameDifficulty[diff.upper()])
-    print(b)
+    m.run()

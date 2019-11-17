@@ -1,7 +1,7 @@
 from typing import Dict, Set
 from unittest import TestCase
 
-from minesweeper.board import Minesweeper, GameDifficulty
+from minesweeper.minesweeper import Minesweeper, GameDifficulty
 
 
 class TestMinesweeper(TestCase):
