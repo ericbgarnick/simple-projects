@@ -21,6 +21,10 @@ class Minesweeper:
                  GameDifficulty.MEDIUM: 20,
                  GameDifficulty.HARD: 30}
 
+    CHOICE_PROMPT = "Choose an index: "
+    LOSE_MESSAGE = "YOU LOSE!"
+    WIN_MESSAGE = "YOU WIN!"
+
     def __init__(self, size: int, difficulty: GameDifficulty):
         self._board_size = size
         self._num_spaces = self._board_size ** 2
@@ -55,12 +59,12 @@ class Minesweeper:
     def run(self):
         while not (self.lost() or self.won()):
             print(self)
-            choice = int(input("Choose an index: "))
+            choice = int(input(self.CHOICE_PROMPT))
             self.reveal_for_chosen(choice)
         if self.lost():
-            print("YOU LOSE!")
+            print(self.LOSE_MESSAGE)
         else:
-            print("YOU WIN!")
+            print(self.WIN_MESSAGE)
         for s in range(self._num_spaces):
             self.reveal_for_chosen(s)
         print(self)
