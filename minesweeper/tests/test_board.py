@@ -1,35 +1,35 @@
 from typing import Dict, Set
 from unittest import TestCase
 
-from minesweeper.board import Board, GameDifficulty
+from minesweeper.board import Minesweeper, GameDifficulty
 
 
-class TestBoard(TestCase):
+class TestMinesweeper(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.board_size = 5
         cls.num_spaces = cls.board_size ** 2
         cls.difficulty = GameDifficulty.EASY
-        cls.b = Board(cls.board_size, cls.difficulty)
+        cls.m = Minesweeper(cls.board_size, cls.difficulty)
 
     def tearDown(self) -> None:
-        self.b._bomb_locs = set()
-        self.b._revealed = {}
+        self.m._bomb_locs = set()
+        self.m._revealed = {}
 
     def test_create_board(self):
-        self.assertEqual(self.b.board_size, self.board_size)
+        self.assertEqual(self.m.board_size, self.board_size)
 
     def test_create_bombs(self):
-        expected_num_bombs = int(Board.PCT_BOMBS[self.difficulty]
+        expected_num_bombs = int(Minesweeper.PCT_BOMBS[self.difficulty]
                                  / 100 * self.num_spaces)
 
-        b = Board(self.board_size, self.difficulty)
+        b = Minesweeper(self.board_size, self.difficulty)
 
         self.assertEqual(expected_num_bombs, len(b.bomb_locations))
 
     def get_neighbors_check(self, spots_to_check: Dict[int, Set[int]]):
         for spot, n in spots_to_check.items():
-            neighbors = self.b.get_neighbors(spot)
+            neighbors = self.m.get_neighbors(spot)
             self.assertSetEqual(n, neighbors)
 
     def test_get_neighbors_corners(self):
@@ -62,7 +62,7 @@ class TestBoard(TestCase):
             ['#' for _ in range(self.board_size)]
             for _ in range(self.board_size)
         ]
-        actual = self.b.build_board_repr()
+        actual = self.m.build_board_repr()
 
         self.assertEqual(len(expected), len(actual))
         for i, e_row in enumerate(expected):
@@ -75,10 +75,10 @@ class TestBoard(TestCase):
             for _ in range(self.board_size)
         ]
 
-        self.b._revealed[0] = "_"
+        self.m._revealed[0] = "_"
         expected[0][0] = '_'
 
-        actual = self.b.build_board_repr()
+        actual = self.m.build_board_repr()
 
         self.assertEqual(len(expected), len(actual))
         for i, e_row in enumerate(expected):
@@ -87,24 +87,24 @@ class TestBoard(TestCase):
 
     def test_calc_symbol_bomb(self):
         pos = 0
-        self.b._bomb_locs.add(pos)
-        symbol = self.b.calc_symbol(pos)
-        self.assertEqual(symbol, self.b.BOMB)
+        self.m._bomb_locs.add(pos)
+        symbol = self.m.calc_symbol(pos)
+        self.assertEqual(symbol, self.m.BOMB)
 
     def test_calc_symbol_blank(self):
         pos = 0
-        symbol = self.b.calc_symbol(pos)
-        self.assertEqual(symbol, self.b.BLANK)
+        symbol = self.m.calc_symbol(pos)
+        self.assertEqual(symbol, self.m.BLANK)
 
     def test_calc_symbol_1(self):
         pos = 0
-        self.b._bomb_locs.add(pos)
-        symbol = self.b.calc_symbol(pos + 1)
+        self.m._bomb_locs.add(pos)
+        symbol = self.m.calc_symbol(pos + 1)
         self.assertEqual(symbol, '1')
 
     def test_calc_symbol_8(self):
-        self.b._bomb_locs |= {0, 1, 2, 5, 7, 10, 11, 12}
-        symbol = self.b.calc_symbol(6)
+        self.m._bomb_locs |= {0, 1, 2, 5, 7, 10, 11, 12}
+        symbol = self.m.calc_symbol(6)
         self.assertEqual(symbol, '8')
 
     def test_reveal_for_chosen_bomb(self):
@@ -116,9 +116,9 @@ class TestBoard(TestCase):
         _ _ _ _ _
         """
         pos = 0
-        self.b._bomb_locs.add(pos)
-        self.b.reveal_for_chosen(pos)
-        self.assertDictEqual(self.b._revealed, {pos: self.b.BOMB})
+        self.m._bomb_locs.add(pos)
+        self.m.reveal_for_chosen(pos)
+        self.assertDictEqual(self.m._revealed, {pos: self.m.BOMB})
 
     def test_reveal_for_chosen_num(self):
         """
@@ -128,9 +128,9 @@ class TestBoard(TestCase):
         _ _ _ _ _
         _ _ _ _ _
         """
-        self.b._bomb_locs.add(0)
-        self.b.reveal_for_chosen(1)
-        self.assertDictEqual(self.b._revealed, {1: '1'})
+        self.m._bomb_locs.add(0)
+        self.m.reveal_for_chosen(1)
+        self.assertDictEqual(self.m._revealed, {1: '1'})
 
     def test_reveal_for_chosen_one_blank(self):
         """
@@ -140,12 +140,12 @@ class TestBoard(TestCase):
         _ _ _ _ _
         _ _ _ _ _
         """
-        self.b._bomb_locs |= {2, 7, 10, 11, 12}
-        self.b.reveal_for_chosen(0)
+        self.m._bomb_locs |= {2, 7, 10, 11, 12}
+        self.m.reveal_for_chosen(0)
 
-        expected = {0: self.b.BLANK, 1: '2', 5: '2', 6: '5'}
+        expected = {0: self.m.BLANK, 1: '2', 5: '2', 6: '5'}
 
-        self.assertDictEqual(self.b._revealed, expected)
+        self.assertDictEqual(self.m._revealed, expected)
 
     def test_reveal_for_chosen_two_blanks(self):
         """
@@ -155,10 +155,10 @@ class TestBoard(TestCase):
         _ _ _ _ _
         _ _ _ _ _
         """
-        self.b._bomb_locs |= {3, 8, 10, 11, 12, 13}
-        self.b.reveal_for_chosen(0)
+        self.m._bomb_locs |= {3, 8, 10, 11, 12, 13}
+        self.m.reveal_for_chosen(0)
 
-        expected = {0: self.b.BLANK, 1: self.b.BLANK,
+        expected = {0: self.m.BLANK, 1: self.m.BLANK,
                     2: '2', 5: '2', 6: '3', 7: '5'}
 
-        self.assertDictEqual(self.b._revealed, expected)
+        self.assertDictEqual(self.m._revealed, expected)

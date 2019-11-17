@@ -11,7 +11,7 @@ class GameDifficulty(Enum):
     HARD = "HARD"
 
 
-class Board:
+class Minesweeper:
 
     HIDDEN = '#'
     BLANK = '_'
@@ -122,5 +122,5 @@ class Board:
 
 if __name__ == '__main__':
     board_size, diff = sys.argv[1:3]
-    b = Board(int(board_size), GameDifficulty[diff.upper()])
+    m = Minesweeper(int(board_size), GameDifficulty[diff.upper()])
     print(b)
