@@ -51,8 +51,9 @@ class Board:
                 board_repr[-1].append(symbol)
         return board_repr
 
-    # TODO: test
     def reveal_for_chosen(self, chosen: int):
+        """Add chosen symbol to self._revealed, adding
+        all blanks encountered and their neighbors"""
         to_check = Queue()
         to_check.put(chosen)
         while not to_check.empty():
@@ -65,6 +66,7 @@ class Board:
                         to_check.put(n)
 
     def calc_symbol(self, i: int) -> str:
+        """Return the symbol to show for the space at index i"""
         if i in self._bomb_locs:
             return self.BOMB
         else:
@@ -75,6 +77,7 @@ class Board:
                     else self.BLANK)
 
     def get_neighbors(self, i: int) -> Set[int]:
+        """Return indices for all spaces adjacent to i"""
         neighbors = set()
         north = south = east = west = -1
 
