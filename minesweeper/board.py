@@ -1,6 +1,7 @@
 import random
 import sys
 from enum import Enum
+from queue import Queue
 from typing import Set, List
 
 
@@ -11,6 +12,10 @@ class GameDifficulty(Enum):
 
 
 class Board:
+
+    HIDDEN = '#'
+    BLANK = '_'
+    BOMB = '*'
 
     PCT_BOMBS = {GameDifficulty.EASY: 10,
                  GameDifficulty.MEDIUM: 20,
@@ -39,30 +44,42 @@ class Board:
     def build_board_repr(self) -> List[List[str]]:
         board_repr = []
         for i in range(self._board_size ** 2):
-            symbol = self._revealed.get(i, '#')
+            symbol = self._revealed.get(i, self.HIDDEN)
             if not i % self._board_size:
                 board_repr.append([symbol])
             else:
                 board_repr[-1].append(symbol)
         return board_repr
 
-    def reveal_spaces(self):
-        board_repr = []
-        for i in range(self._board_size ** 2):
-            if i in self._bomb_locs:
-                symbol = "*"
-            else:
-                symbol = self._revealed.get(i) or self.calc_symbol(i)
-            if not i % self._board_size:
-                board_repr.append([symbol])
-            else:
-                board_repr[-1].append(symbol)
-        return board_repr
+    # TODO: test
+    def reveal_for_chosen(self, chosen: int):
+        symbol = self.calc_symbol(chosen)
+        if symbol == self.BLANK:
+            self.expand_blanks(chosen)
 
+    # TODO: test
+    def expand_blanks(self, chosen: int):
+        to_check = Queue()
+        to_check.put(chosen)
+        while to_check:
+            cur = to_check.get()
+            cur_symbol = self.calc_symbol(cur)
+            self._revealed[cur] = cur_symbol
+            if cur_symbol == self.BLANK:
+                for n in self.get_neighbors(cur):
+                    if n not in self._revealed:
+                        to_check.put(n)
+
+    # TODO: test
     def calc_symbol(self, i: int) -> str:
-        neighbors = self.get_neighbors(i)
-        num_bomb_neighbors = len(neighbors & self._bomb_locs)
-        return str(num_bomb_neighbors) if num_bomb_neighbors else '_'
+        if i in self._bomb_locs:
+            return self.BOMB
+        else:
+            neighbors = self.get_neighbors(i)
+            num_bomb_neighbors = len(neighbors & self._bomb_locs)
+            return (str(num_bomb_neighbors)
+                    if num_bomb_neighbors
+                    else self.BLANK)
 
     def get_neighbors(self, i: int) -> Set[int]:
         neighbors = set()
@@ -111,3 +128,4 @@ if __name__ == '__main__':
     board_size, diff = sys.argv[1:3]
     b = Board(int(board_size), GameDifficulty[diff.upper()])
     print(b)
+

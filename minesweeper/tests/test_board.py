@@ -12,6 +12,9 @@ class TestBoard(TestCase):
         cls.difficulty = GameDifficulty.EASY
         cls.b = Board(cls.board_size, cls.difficulty)
 
+    def tearDown(self) -> None:
+        self.b._bomb_locs = set()
+
     def test_create_board(self):
         self.assertEqual(self.b.board_size, self.board_size)
 
@@ -81,3 +84,24 @@ class TestBoard(TestCase):
             a_row = actual[i]
             self.assertListEqual(e_row, a_row)
 
+    def test_calc_symbol_bomb(self):
+        pos = 0
+        self.b._bomb_locs.add(pos)
+        symbol = self.b.calc_symbol(pos)
+        self.assertEqual(symbol, self.b.BOMB)
+
+    def test_calc_symbol_blank(self):
+        pos = 0
+        symbol = self.b.calc_symbol(pos)
+        self.assertEqual(symbol, self.b.BLANK)
+
+    def test_calc_symbol_1(self):
+        pos = 0
+        self.b._bomb_locs.add(pos)
+        symbol = self.b.calc_symbol(pos + 1)
+        self.assertEqual(symbol, '1')
+
+    def test_calc_symbol_8(self):
+        self.b._bomb_locs |= {0, 1, 2, 5, 7, 10, 11, 12}
+        symbol = self.b.calc_symbol(6)
+        self.assertEqual(symbol, '8')
